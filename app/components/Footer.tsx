@@ -13,7 +13,7 @@ const Footer = () => {
       <section className="flex flex-col gap-[1rem]">
         <div className="flex flex-col gap-2">
           <h1 className="font-semibold">Company</h1>
-          <div className="h-[1px] bg-cyan-300 w-[3rem]"></div>
+          <div className="h-[1px] bg-[#2acea5] w-[3rem]"></div>
         </div>
 
         <ul className="flex flex-col gap-[0.75rem] text-xs text-neutral-400">
@@ -27,7 +27,7 @@ const Footer = () => {
       <section className="flex flex-col gap-[1rem]">
         <div className="flex flex-col gap-2">
           <h1 className="font-semibold">Help</h1>
-          <div className="h-[1px] bg-cyan-300 w-[1.5rem]"></div>
+          <div className="h-[1px] bg-[#2acea5] w-[1.5rem]"></div>
         </div>
 
         <ul className="flex flex-col gap-[0.75rem] text-xs text-neutral-400">
@@ -41,7 +41,7 @@ const Footer = () => {
       <section className="flex flex-col gap-[1rem]">
         <div className="flex flex-col gap-2">
           <h1 className="font-semibold">Resources</h1>
-          <div className="h-[1px] bg-cyan-300 w-[3rem]"></div>
+          <div className="h-[1px] bg-[#2acea5] w-[3rem]"></div>
         </div>
 
         <ul className="flex flex-col gap-[0.75rem] text-xs text-neutral-400">
@@ -55,7 +55,7 @@ const Footer = () => {
       <section className="flex flex-col gap-[1rem]">
         <div className="flex flex-col gap-2">
           <h1 className="font-semibold">Follow Us</h1>
-          <div className="h-[1px] bg-cyan-300 w-[3rem]"></div>
+          <div className="h-[1px] bg-[#2acea5] w-[3rem]"></div>
         </div>
 
         <ul className="flex flex-row gap-[1rem] text-neutral-400">
