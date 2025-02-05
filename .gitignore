@@ -34,7 +34,7 @@ yarn-error.log*
 .env*
 
 # Allow tracking the specific dummy env file
-!env_local_for_git
+!.env_local_for_git
 
 # vercel
 .vercel
