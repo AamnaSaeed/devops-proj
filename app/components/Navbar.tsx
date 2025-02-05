@@ -20,13 +20,13 @@ const NavBar = () => {
         </Link>
 
         <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse gap-4">
-          <Link href="/login" type="button" className="text-white bg-gradient-to-r from-[#10a37f] to-[#27826c] hover:bg-gradient-to-bl font-medium rounded-lg text-md px-4 py-2 text-center cursor-pointer">
+          <Link href="/login" className="text-white bg-gradient-to-r from-[#10a37f] to-[#27826c] hover:bg-gradient-to-bl font-medium rounded-lg text-md px-4 py-2 text-center cursor-pointer">
             Get started
           </Link>
 
-          <button type="button" className="text-white bg-gradient-to-r from-[#10a37f] to-[#27826c] hover:bg-gradient-to-bl font-medium rounded-lg text-md px-4 py-2 text-center flex flex-row gap-2 items-center">
-            <FaGithub className="text-xl" />
-            <span>GitHub</span>
+          <button onClick={() => window.open("https://github.com/aliasif78/pak-wheels", "_blank")} className="text-white bg-gradient-to-r from-[#10a37f] to-[#27826c] hover:bg-gradient-to-bl font-medium rounded-lg text-md px-4 py-2 text-center flex flex-row gap-2 items-center">
+            <FaGithub className="text-xl cursor-pointer" />
+            <span className="cursor-pointer">GitHub</span>
           </button>
         </div>
 
