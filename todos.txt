@@ -1,0 +1,10 @@
+JWT Token
+Cookies
+Middleware
+Recaptcha
+Email Verification
+Password Reset
+Next Auth
+Remember me
+Two Factor Authentication
+Validating all information's structure in the backend (e.g email, phone number, etc)

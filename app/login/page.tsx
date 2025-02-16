@@ -5,12 +5,15 @@ import React from "react";
 import Form from "next/form";
 import Link from "next/link";
 
+// Server Actions
+// import { loginAction } from "@/actions/auth";
+
 const Login = () => {
   return (
     <div className="flex flex-col gap-[2rem] items-center justify-center min-h-screen">
       <h1 className="text-4xl font-semibold text-neutral-800 mt-[5rem]">Welcome Back</h1>
 
-      <Form action="/search" className="flex flex-col gap-[1rem] w-[25vw] justify-center items-center">
+      <Form action="/" className="flex flex-col gap-[1rem] w-[25vw] justify-center items-center">
         {/* Send Confirmation Email */}
         <input name="email" className="rounded-md px-4 py-3 border-[1px] border-neutral-300 focus:border-[#10a37f] focus:outline-none w-full" placeholder="Email Address" />
         <input name="password" type="password" className="rounded-md px-4 py-3 border-[1px] border-neutral-300 focus:border-[#10a37f] focus:outline-none w-full" placeholder="Password" />

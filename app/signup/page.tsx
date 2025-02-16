@@ -1,31 +1,245 @@
+"use client";
+
 // React
-import React from "react";
+import React, { useState, useRef } from "react";
 
 // Next JS
 import Form from "next/form";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+// Dependencies
+import { toast } from "react-toastify";
+
+// Icons
+import { RiErrorWarningLine } from "react-icons/ri";
+
+// Interfaces
+interface FormData {
+  name: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+  reenterPassword: string;
+}
 
 const SignUp = () => {
+  // ------- //
+  //  Hooks  //
+  // ------- //
+  const router = useRouter();
+
+  // ------ //
+  //  Refs  //
+  // ------ //
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // -------- //
+  //  States  //
+  // -------- //
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    reenterPassword: "",
+  });
+
+  // Only activates once the form is submitted once
+  const [isFormTriggered, setIsFormTriggered] = useState(false);
+  const [samePasswords, setSamePasswords] = useState(true);
+
+  const [isName, setIsName] = useState(true);
+  const [isEmail, setIsEmail] = useState(true);
+  const [isPhoneNumber, setIsPhoneNumber] = useState(true);
+  const [isPassword, setIsPassword] = useState(true);
+  const [isReenterPassword, setIsReenterPassword] = useState(true);
+
+  const [existingEmail, setExistingEmail] = useState(false);
+  const [existingPhoneNumber, setExistingPhoneNumber] = useState(false);
+
+  // ---------- //
+  //  Handlers  //
+  // ---------- //
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    // Updates the specific field in the form data
+    setFormData((prevState) => ({ ...prevState, [name]: value }));
+
+    // Check if all the fields are present
+    if (!isName && name === "name") setIsName(true);
+    if (!isEmail && name === "email") setIsEmail(true);
+    if (!isPhoneNumber && name === "phoneNumber") setIsPhoneNumber(true);
+    if (!isPassword && name === "password") setIsPassword(true);
+    if (!isReenterPassword && name === "reenterPassword") setIsReenterPassword(true);
+
+    // Check if the passwords match
+    if (isFormTriggered && (name === "password" || name === "reenterPassword")) {
+      let arePasswordsSame = false;
+
+      if (name === "password") arePasswordsSame = value === formData.reenterPassword;
+      else if (name === "reenterPassword") arePasswordsSame = formData.password === value;
+
+      setSamePasswords(arePasswordsSame);
+    }
+
+    // Check if the email or phone number were already existing
+    if (existingEmail) setExistingEmail(false);
+    if (existingPhoneNumber) setExistingPhoneNumber(false);
+  };
+
+  const handleFormSubmit = async () => {
+    if (!formRef.current) return;
+    setIsFormTriggered(true);
+
+    console.log("Form Data:", formData);
+
+    // Check if all the fields are present
+    if (!formData.name || !formData.email || !formData.phoneNumber || !formData.password || !formData.reenterPassword) {
+      if (!formData.name) setIsName(false);
+      else if (!formData.email) setIsEmail(false);
+      else if (!formData.phoneNumber) setIsPhoneNumber(false);
+      else if (!formData.password) setIsPassword(false);
+      else if (!formData.reenterPassword) setIsReenterPassword(false);
+
+      return;
+    }
+
+    // Check if the passwords match
+    if (formData.password !== formData.reenterPassword) {
+      setSamePasswords(false);
+      return;
+    }
+
+    formRef.current.reset();
+
+    // Now, hit a backend request to sign up the user
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/users/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      console.log(response);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+
+        if (errorData?.message === "Existing email.") setExistingEmail(true);
+        else if (errorData?.message === "Existing phone number.") setExistingPhoneNumber(true);
+
+        // toast.error(errorData?.message || "Something went wrong. Please try again.");
+        return;
+      }
+
+      toast.success("Account created successfully!");
+
+      // Redirect the user to the home page now
+      router.push("/");
+    } catch (error: unknown) {
+      console.error("Form Submission Error:", error instanceof Error ? error.message : error);
+      toast.error("An unknown error occurred. Please try again later.");
+    }
+  };
+
   return (
     <div className="flex flex-col gap-[2rem] items-center justify-center h-[100vh]">
       <h1 className="text-4xl font-semibold text-neutral-800 mt-[12rem]">Create an account</h1>
 
-      <Form action="/search" className="flex flex-col gap-[1rem] w-[25vw] justify-center items-center">
-        {/* Send Confirmation Email */}
-        <input name="name" type="text" className="rounded-md px-4 py-3 border-[1px] border-neutral-300 focus:border-[#10a37f] focus:outline-none w-full" placeholder="Full Name" />
-        <input name="email" type="email" className="rounded-md px-4 py-3 border-[1px] border-neutral-300 focus:border-[#10a37f] focus:outline-none w-full" placeholder="Email Address" />
-        <input name="tel" type="phone-number" className="rounded-md px-4 py-3 border-[1px] border-neutral-300 focus:border-[#10a37f] focus:outline-none w-full" placeholder="Phone Number" />
+      <Form ref={formRef} action={handleFormSubmit} className="flex flex-col gap-[1rem] w-[25vw] justify-center items-center">
+        {/* Name Input */}
+        <input
+          name="name"
+          type="text"
+          className={`rounded-md px-4 py-3 border-[1px] ${isName ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"} focus:outline-none w-full`}
+          placeholder="Full Name"
+          value={formData.name} // Bind value to formData.name
+          onChange={handleInputChange} // Handle input change
+        />
 
-        <input name="password" type="password" className="rounded-md px-4 py-3 border-[1px] border-neutral-300 focus:border-[#10a37f] focus:outline-none w-full" placeholder="Password" />
-        <input name="reenter-password" type="password" className="rounded-md px-4 py-3 border-[1px] border-neutral-300 focus:border-[#10a37f] focus:outline-none w-full" placeholder="Re-enter password" />
+        {!isName && (
+          <span className="flex flex-row gap-1 justify-center items-center text-red-500 text-sm font-light">
+            <RiErrorWarningLine className="text-lg" />
+            Please provide a name.
+          </span>
+        )}
 
-        {/* ADD RECAPTCHA HERE */}
-        {/* REMEMBER ME */}
+        {/* Email Input */}
+        <input
+          name="email"
+          type="email"
+          className={`rounded-md px-4 py-3 border-[1px] ${isEmail && !existingEmail ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"} focus:outline-none w-full`}
+          placeholder="Email Address"
+          value={formData.email} // Bind value to formData.email
+          onChange={handleInputChange} // Handle input change
+        />
 
-        <button type="submit" className="bg-[#10a37f] hover:bg-[#2e8d75] font-light px-4 py-3 m-[1rem] rounded-md transition duration-200 text-white w-full">
+        {(!isEmail || existingEmail) && (
+          <span className="flex flex-row gap-1 justify-center items-center text-red-500 text-sm font-light">
+            <RiErrorWarningLine className="text-lg" />
+            {!isEmail ? "Please provide an email." : "This email is already being used."}
+          </span>
+        )}
+
+        {/* Phone Number Input */}
+        <input
+          name="phoneNumber"
+          type="text"
+          className={`rounded-md px-4 py-3 border-[1px] ${isPhoneNumber && !existingPhoneNumber ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"} focus:outline-none w-full`}
+          placeholder="Phone Number"
+          value={formData.phoneNumber} // Bind value to formData.phoneNumber
+          onChange={handleInputChange} // Handle input change
+        />
+
+        {(!isPhoneNumber || existingPhoneNumber) && (
+          <span className="flex flex-row gap-1 justify-center items-center text-red-500 text-sm font-light">
+            <RiErrorWarningLine className="text-lg" />
+            {!isEmail ? "Please provide an phone number." : "This number is already being used."}
+          </span>
+        )}
+
+        {/* Password Input */}
+        <input
+          name="password"
+          type="password"
+          className={`rounded-md px-4 py-3 border-[1px] ${isPassword && samePasswords ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"}  focus:outline-none w-full`}
+          placeholder="Password"
+          value={formData.password} // Bind value to formData.password
+          onChange={handleInputChange} // Handle input change
+        />
+
+        {!isPassword && (
+          <span className="flex flex-row gap-1 justify-center items-center text-red-500 text-sm font-light">
+            <RiErrorWarningLine className="text-lg" />
+            Please provide a password.
+          </span>
+        )}
+
+        {/* Re-enter Password Input */}
+        <input
+          name="reenterPassword"
+          type="password"
+          className={`rounded-md px-4 py-3 border-[1px] ${isReenterPassword && samePasswords ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"}  focus:outline-none w-full`}
+          placeholder="Re-enter password"
+          value={formData.reenterPassword} // Bind value to formData.reenterPassword
+          onChange={handleInputChange} // Handle input change
+        />
+
+        {(!samePasswords || !isReenterPassword) && (
+          <span className="flex flex-row gap-1 justify-center items-center text-red-500 text-sm font-light">
+            <RiErrorWarningLine className="text-lg" />
+            {!samePasswords ? "Passwords do not match." : "Please re-enter your password."}
+          </span>
+        )}
+
+        {/* Submit Button */}
+        <button disabled={!samePasswords || !isName || !isEmail || !isPhoneNumber || !isPassword || !isReenterPassword || existingEmail || existingPhoneNumber} type="submit" className={`bg-[#10a37f] hover:bg-[#2e8d75] font-light px-4 py-3 m-[1rem] rounded-md transition duration-200 text-white w-full disabled:opacity-50 disabled:cursor-not-allowed`}>
           Continue
         </button>
 
+        {/* Login Link */}
         <span className="flex flex-row gap-[0.5rem] -mt-[1rem] text-sm font-light">
           Already have an account?
           <Link href="/login" className="text-[#10a37f] cursor-pointer">
@@ -33,12 +247,14 @@ const SignUp = () => {
           </Link>
         </span>
 
+        {/* OR Divider */}
         <div className="flex flex-row gap-[1rem] mt-[1rem] justify-center items-center w-full text-xs font-light">
           <div className="w-full h-[1px] bg-[#c2c8d0]"></div>
           <span>OR</span>
           <div className="w-full h-[1px] bg-[#c2c8d0]"></div>
         </div>
 
+        {/* Google Login Button */}
         <button type="button" className="flex items-center bg-white border border-neutral-300 rounded-md w-full px-6 py-3 text-sm font-light hover:bg-gray-200">
           <svg className="h-6 w-6 mr-2" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="-0.5 0 48 48" version="1.1">
             <g id="Icons" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
