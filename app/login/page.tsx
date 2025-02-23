@@ -1,22 +1,140 @@
+"use client";
+
 // React
-import React from "react";
+import React, { useState, useRef } from "react";
 
 // Next JS
 import Form from "next/form";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-// Server Actions
-// import { loginAction } from "@/actions/auth";
+// Dependencies
+import { toast } from "react-toastify";
+
+// Icons
+import { RiErrorWarningLine } from "react-icons/ri";
 
 const Login = () => {
+  // ------------ //
+  //  INTERFACES  //
+  // ------------ //
+  interface FormData {
+    email: string;
+    password: string;
+  }
+
+  // ------- //
+  //  HOOKS  //
+  // ------- //
+  const router = useRouter();
+
+  // ------ //
+  //  REFS  //
+  // ------ //
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // -------- //
+  //  STATES  //
+  // -------- //
+  const [formData, setFormData] = useState<FormData>({
+    email: "",
+    password: "",
+  });
+
+  // Only activates once the form is submitted once
+  const [isEmail, setIsEmail] = useState(true);
+  const [isPassword, setIsPassword] = useState(true);
+
+  const [existingEmail, setExistingEmail] = useState(false);
+  const [incorrectPassword, setIncorrectPassword] = useState(false);
+
+  // ---------- //
+  //  Handlers  //
+  // ---------- //
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    // Updates the specific field in the form data
+    setFormData((prevState) => ({ ...prevState, [name]: value }));
+
+    // Check if all the fields are present
+    if (!isEmail && name === "email") setIsEmail(true);
+    if (!isPassword && name === "password") setIsPassword(true);
+
+    // Check if the email or phone number were already existing
+    if (existingEmail) setExistingEmail(false);
+    if (incorrectPassword) setIncorrectPassword(false);
+  };
+
+  const handleFormSubmit = async () => {
+    if (!formRef.current) return;
+
+    console.log("Form Data:", formData);
+
+    // Check if all the fields are present
+    if (!formData.email || !formData.password) {
+      if (!formData.email) setIsEmail(false);
+      else if (!formData.password) setIsPassword(false);
+
+      return;
+    }
+
+    // Reset the form
+    formRef.current.reset();
+
+    // Now, hit a backend request to login the user
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/users/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      console.log(response);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+
+        if (errorData?.message === "Unknown email address.") setExistingEmail(true);
+        else if (errorData?.message === "Invalid credentials.") setIncorrectPassword(true);
+
+        // toast.error(errorData?.message || "Something went wrong. Please try again.");
+        return;
+      }
+
+      toast.success("Login successful!");
+
+      // Redirect the user to the home page now
+      router.push("/");
+    } catch (error: unknown) {
+      console.error("Form Submission Error:", error instanceof Error ? error.message : error);
+      toast.error("An unknown error occurred. Please try again later.");
+    }
+  };
+
   return (
     <div className="flex flex-col gap-[2rem] items-center justify-center min-h-screen">
       <h1 className="text-4xl font-semibold text-neutral-800 mt-[5rem]">Welcome Back</h1>
 
-      <Form action="/" className="flex flex-col gap-[1rem] w-[25vw] justify-center items-center">
+      <Form ref={formRef} action={handleFormSubmit} className="flex flex-col gap-[1rem] w-[25vw] justify-center items-center">
         {/* Send Confirmation Email */}
-        <input name="email" className="rounded-md px-4 py-3 border-[1px] border-neutral-300 focus:border-[#10a37f] focus:outline-none w-full" placeholder="Email Address" />
-        <input name="password" type="password" className="rounded-md px-4 py-3 border-[1px] border-neutral-300 focus:border-[#10a37f] focus:outline-none w-full" placeholder="Password" />
+        <input name="email" type="text" value={formData.email} onChange={handleInputChange} className={`rounded-md px-4 py-3 border-[1px] ${isEmail && !existingEmail ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"} focus:outline-none w-full`} placeholder="Email Address" />
+
+        {(!isEmail || existingEmail) && (
+          <span className="flex flex-row gap-1 justify-center items-center text-red-500 text-sm font-light">
+            <RiErrorWarningLine className="text-lg" />
+            {!isEmail ? "Please provide an email." : "Incorrect email address."}
+          </span>
+        )}
+
+        <input name="password" type="password" value={formData.password} onChange={handleInputChange} className={`rounded-md px-4 py-3 border-[1px] ${isPassword && !incorrectPassword ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"}  focus:outline-none w-full`} placeholder="Password" />
+
+        {(!isPassword || incorrectPassword) && (
+          <span className="flex flex-row gap-1 justify-center items-center text-red-500 text-sm font-light">
+            <RiErrorWarningLine className="text-lg" />
+            {!isPassword ? "Please provide a password." : "Incorrect password."}
+          </span>
+        )}
 
         {/* Forgot Password */}
         <span className="font-light text-sm text-start w-full text-[#10a37f] cursor-pointer">Forgot password?</span>

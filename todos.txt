@@ -6,5 +6,7 @@ Email Verification
 Password Reset
 Next Auth
 Remember me
-Two Factor Authentication
+2FA (email, SMS, or an authenticator app like Google Authenticator)
 Validating all information's structure in the backend (e.g email, phone number, etc)
+Cloudflare for rate limiting/attempt lockout on passwords (express-rate-limit)
+CSRF

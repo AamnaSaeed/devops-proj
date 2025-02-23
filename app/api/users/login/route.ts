@@ -46,7 +46,7 @@ export async function POST(request: Request): Promise<NextResponse<{ message: st
     const existingUser = await User.findOne({ email });
 
     if (!existingUser) {
-      return NextResponse.json({ message: "User does not exist." }, { status: 404 });
+      return NextResponse.json({ message: "Unknown email address." }, { status: 404 });
     }
 
     // Step 5: User exists - decrypt & compare their password

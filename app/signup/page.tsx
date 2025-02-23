@@ -14,28 +14,30 @@ import { toast } from "react-toastify";
 // Icons
 import { RiErrorWarningLine } from "react-icons/ri";
 
-// Interfaces
-interface FormData {
-  name: string;
-  email: string;
-  phoneNumber: string;
-  password: string;
-  reenterPassword: string;
-}
-
 const SignUp = () => {
+  // ------------ //
+  //  INTERFACES  //
+  // ------------ //
+  interface FormData {
+    name: string;
+    email: string;
+    phoneNumber: string;
+    password: string;
+    reenterPassword: string;
+  }
+
   // ------- //
-  //  Hooks  //
+  //  HOOKS  //
   // ------- //
   const router = useRouter();
 
   // ------ //
-  //  Refs  //
+  //  REFS  //
   // ------ //
   const formRef = useRef<HTMLFormElement>(null);
 
   // -------- //
-  //  States  //
+  //  STATES  //
   // -------- //
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -150,14 +152,7 @@ const SignUp = () => {
 
       <Form ref={formRef} action={handleFormSubmit} className="flex flex-col gap-[1rem] w-[25vw] justify-center items-center">
         {/* Name Input */}
-        <input
-          name="name"
-          type="text"
-          className={`rounded-md px-4 py-3 border-[1px] ${isName ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"} focus:outline-none w-full`}
-          placeholder="Full Name"
-          value={formData.name} // Bind value to formData.name
-          onChange={handleInputChange} // Handle input change
-        />
+        <input name="name" type="text" className={`rounded-md px-4 py-3 border-[1px] ${isName ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"} focus:outline-none w-full`} placeholder="Full Name" value={formData.name} onChange={handleInputChange} />
 
         {!isName && (
           <span className="flex flex-row gap-1 justify-center items-center text-red-500 text-sm font-light">
@@ -167,14 +162,7 @@ const SignUp = () => {
         )}
 
         {/* Email Input */}
-        <input
-          name="email"
-          type="email"
-          className={`rounded-md px-4 py-3 border-[1px] ${isEmail && !existingEmail ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"} focus:outline-none w-full`}
-          placeholder="Email Address"
-          value={formData.email} // Bind value to formData.email
-          onChange={handleInputChange} // Handle input change
-        />
+        <input name="email" type="email" className={`rounded-md px-4 py-3 border-[1px] ${isEmail && !existingEmail ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"} focus:outline-none w-full`} placeholder="Email Address" value={formData.email} onChange={handleInputChange} />
 
         {(!isEmail || existingEmail) && (
           <span className="flex flex-row gap-1 justify-center items-center text-red-500 text-sm font-light">
@@ -184,14 +172,7 @@ const SignUp = () => {
         )}
 
         {/* Phone Number Input */}
-        <input
-          name="phoneNumber"
-          type="text"
-          className={`rounded-md px-4 py-3 border-[1px] ${isPhoneNumber && !existingPhoneNumber ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"} focus:outline-none w-full`}
-          placeholder="Phone Number"
-          value={formData.phoneNumber} // Bind value to formData.phoneNumber
-          onChange={handleInputChange} // Handle input change
-        />
+        <input name="phoneNumber" type="text" className={`rounded-md px-4 py-3 border-[1px] ${isPhoneNumber && !existingPhoneNumber ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"} focus:outline-none w-full`} placeholder="Phone Number" value={formData.phoneNumber} onChange={handleInputChange} />
 
         {(!isPhoneNumber || existingPhoneNumber) && (
           <span className="flex flex-row gap-1 justify-center items-center text-red-500 text-sm font-light">
@@ -201,14 +182,7 @@ const SignUp = () => {
         )}
 
         {/* Password Input */}
-        <input
-          name="password"
-          type="password"
-          className={`rounded-md px-4 py-3 border-[1px] ${isPassword && samePasswords ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"}  focus:outline-none w-full`}
-          placeholder="Password"
-          value={formData.password} // Bind value to formData.password
-          onChange={handleInputChange} // Handle input change
-        />
+        <input name="password" type="password" className={`rounded-md px-4 py-3 border-[1px] ${isPassword && samePasswords ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"}  focus:outline-none w-full`} placeholder="Password" value={formData.password} onChange={handleInputChange} />
 
         {!isPassword && (
           <span className="flex flex-row gap-1 justify-center items-center text-red-500 text-sm font-light">
@@ -218,14 +192,7 @@ const SignUp = () => {
         )}
 
         {/* Re-enter Password Input */}
-        <input
-          name="reenterPassword"
-          type="password"
-          className={`rounded-md px-4 py-3 border-[1px] ${isReenterPassword && samePasswords ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"}  focus:outline-none w-full`}
-          placeholder="Re-enter password"
-          value={formData.reenterPassword} // Bind value to formData.reenterPassword
-          onChange={handleInputChange} // Handle input change
-        />
+        <input name="reenterPassword" type="password" className={`rounded-md px-4 py-3 border-[1px] ${isReenterPassword && samePasswords ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"}  focus:outline-none w-full`} placeholder="Re-enter password" value={formData.reenterPassword} onChange={handleInputChange} />
 
         {(!samePasswords || !isReenterPassword) && (
           <span className="flex flex-row gap-1 justify-center items-center text-red-500 text-sm font-light">
