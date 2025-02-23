@@ -9,6 +9,11 @@ import { NextResponse } from "next/server";
 
 // Dependencies
 import bcrypt from "bcryptjs";
+import { sign } from "jsonwebtoken";
+import { serialize } from "cookie";
+
+// Constants
+import { COOKIE_NAME, COOKIE_AGE } from "@/constants";
 
 // Interfaces
 interface UserRequest {
@@ -57,23 +62,25 @@ export async function POST(request: Request): Promise<NextResponse<{ message: st
     }
 
     // Step 6: Generate a JWT token for the user
-    // const token = generateToken({
-    //   userId: existingUser._id.toString(),
-    //   email: existingUser.email,
-    //   name: existingUser.name,
-    // });
+    const secret = process.env.JWT_SECRET || ""; // Always check this
+    const token = sign({ email: existingUser.email }, secret, { expiresIn: COOKIE_AGE });
 
-    // Step 7: Set the token in an HTTP-only cookie
-    // setAuthCookie(token);
+    const serialized = serialize(COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: COOKIE_AGE,
+    });
 
-    // Step 8: Return the existing user (with only necessary fields for security)
+    // Step 7: Return the existing user (with only necessary fields for security)
     const userResponse: UserResponse = {
       name: existingUser.name,
       email: existingUser.email,
       phoneNumber: existingUser.phoneNumber,
     };
 
-    return NextResponse.json({ message: "User logged in successfully", user: userResponse }, { status: 200 });
+    return NextResponse.json({ message: "User logged in successfully", user: userResponse }, { status: 200, headers: { "Set-Cookie": serialized } });
   } catch (error: unknown) {
     console.error("Error in user signup:", error instanceof Error ? error.message : "Unknown error");
     return NextResponse.json({ message: "An error occurred while logging in." }, { status: 500 });
