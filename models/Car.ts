@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, models } from 'mongoose';
 
 const CarSchema = new Schema({
     ownerId: { type: Schema.Types.ObjectId, ref: "User", required: true }, 
@@ -15,4 +15,6 @@ const CarSchema = new Schema({
     updatedAt: { type: Date, default: Date.now },
 });
 
-export default model("Car", CarSchema, "Cars"); 
+const Car = models.Car || model("Car", CarSchema);
+
+export default Car;
