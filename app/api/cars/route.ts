@@ -21,9 +21,6 @@ interface CarRequest {
   isForRent?: boolean;
 }
 
-// @desc    Create a new car listing
-// @route   POST /api/cars
-// @access  Private (Authenticated Users Only)
 export async function POST(request: Request): Promise<NextResponse<{ message: string; car?: object }>> {
     try {
         // Step 1: Parse the request body
@@ -61,5 +58,19 @@ export async function POST(request: Request): Promise<NextResponse<{ message: st
     catch (error) {
         console.error("Error creating car:", error instanceof Error ? error.message : "Unknown error");
         return NextResponse.json({ message: "An error occurred while listing the car." }, { status: 500 });
+    }
+};
+
+export async function GET() {
+    try {
+        await connectDB();
+        const cars = await Car.find();
+        return NextResponse.json({ cars });
+    }
+    catch(error: unknown) {
+        if (error instanceof Error) console.error(error.message);
+        else console.error("An unknown error occurred.");
+        
+        return NextResponse.json({ message: "An error occurred." }, { status: 500 });
     }
 };
