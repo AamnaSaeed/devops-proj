@@ -10,16 +10,16 @@ import { NextResponse } from "next/server";
 
 // Interfaces
 interface CarRequest {
-  ownerId: string;
-  title: string;
-  description?: string;
-  location: string;
-  price?: number;
-  pricePerDay?: number;
-  images: string[];
-  isForSale?: boolean;
-  isForRent?: boolean;
-}
+    ownerId: string;
+    title: string;
+    description?: string;
+    location: string;
+    price?: number;
+    pricePerDay?: number;
+    images: string[];
+    isForSale?: boolean;
+    isForRent?: boolean;
+};
 
 export async function POST(request: Request): Promise<NextResponse<{ message: string; car?: object }>> {
     try {
