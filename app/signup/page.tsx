@@ -11,13 +11,14 @@ import { useRouter } from "next/navigation";
 // Dependencies
 import { toast } from "react-toastify";
 
+// Contexts
+import { useAuth } from "@/context/AuthContext";
+
 // Icons
 import { RiErrorWarningLine } from "react-icons/ri";
 
 const SignUp = () => {
-  // ------------ //
-  //  INTERFACES  //
-  // ------------ //
+  // Types
   interface FormData {
     name: string;
     email: string;
@@ -26,19 +27,14 @@ const SignUp = () => {
     reenterPassword: string;
   }
 
-  // ------- //
-  //  HOOKS  //
-  // ------- //
+  // Hooks
+  const { setUser } = useAuth();
   const router = useRouter();
 
-  // ------ //
-  //  REFS  //
-  // ------ //
+  // Refs
   const formRef = useRef<HTMLFormElement>(null);
 
-  // -------- //
-  //  STATES  //
-  // -------- //
+  // States
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -60,9 +56,7 @@ const SignUp = () => {
   const [existingEmail, setExistingEmail] = useState(false);
   const [existingPhoneNumber, setExistingPhoneNumber] = useState(false);
 
-  // ---------- //
-  //  Handlers  //
-  // ---------- //
+  // Functions
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
@@ -95,8 +89,6 @@ const SignUp = () => {
     if (!formRef.current) return;
     setIsFormTriggered(true);
 
-    console.log("Form Data:", formData);
-
     // Check if all the fields are present
     if (!formData.name || !formData.email || !formData.phoneNumber || !formData.password || !formData.reenterPassword) {
       if (!formData.name) setIsName(false);
@@ -118,14 +110,13 @@ const SignUp = () => {
 
     // Now, hit a backend request to sign up the user
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/users/signup`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
-      console.log(response);
-
+      // Failure
       if (!response.ok) {
         const errorData = await response.json();
 
@@ -136,9 +127,12 @@ const SignUp = () => {
         return;
       }
 
+      // Success
       toast.success("Account created successfully!");
 
-      // Redirect the user to the home page now
+      const data = await response.json();
+      setUser(data.user);
+
       router.push("/");
     } catch (error: unknown) {
       console.error("Form Submission Error:", error instanceof Error ? error.message : error);

@@ -12,12 +12,12 @@ const connectDB = async (): Promise<void> => {
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message);
+      console.error("Database connection error:", error.message);
     } else {
       console.error("An unknown error occurred.");
     }
 
-    process.exit(1);
+    throw new Error("Failed to connect to the database.");
   }
 };
 

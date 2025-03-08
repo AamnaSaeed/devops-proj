@@ -11,31 +11,27 @@ import { useRouter } from "next/navigation";
 // Dependencies
 import { toast } from "react-toastify";
 
+// Contexts
+import { useAuth } from "@/context/AuthContext";
+
 // Icons
 import { RiErrorWarningLine } from "react-icons/ri";
 
 const Login = () => {
-  // ------------ //
-  //  INTERFACES  //
-  // ------------ //
+  // Types
   interface FormData {
     email: string;
     password: string;
   }
 
-  // ------- //
-  //  HOOKS  //
-  // ------- //
+  // Hooks
   const router = useRouter();
+  const { setUser } = useAuth();
 
-  // ------ //
-  //  REFS  //
-  // ------ //
+  // Refs
   const formRef = useRef<HTMLFormElement>(null);
 
-  // -------- //
-  //  STATES  //
-  // -------- //
+  // States
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -48,9 +44,7 @@ const Login = () => {
   const [existingEmail, setExistingEmail] = useState(false);
   const [incorrectPassword, setIncorrectPassword] = useState(false);
 
-  // ---------- //
-  //  Handlers  //
-  // ---------- //
+  // Functions
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
@@ -69,8 +63,6 @@ const Login = () => {
   const handleFormSubmit = async () => {
     if (!formRef.current) return;
 
-    console.log("Form Data:", formData);
-
     // Check if all the fields are present
     if (!formData.email || !formData.password) {
       if (!formData.email) setIsEmail(false);
@@ -84,14 +76,13 @@ const Login = () => {
 
     // Now, hit a backend request to login the user
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/users/login`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
-      console.log(response);
-
+      // Failure
       if (!response.ok) {
         const errorData = await response.json();
 
@@ -102,9 +93,11 @@ const Login = () => {
         return;
       }
 
-      toast.success("Login successful!");
+      // Success
+      const data = await response.json();
+      setUser(data.user);
 
-      // Redirect the user to the home page now
+      toast.success("Login successful!");
       router.push("/");
     } catch (error: unknown) {
       console.error("Form Submission Error:", error instanceof Error ? error.message : error);
