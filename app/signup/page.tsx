@@ -1,48 +1,52 @@
 "use client";
 
 // React
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 // Next JS
 import Form from "next/form";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Dependencies
 import { toast } from "react-toastify";
+import axios from "axios";
+
+// Contexts
+import { useAuth } from "@/context/AuthContext";
 
 // Icons
 import { RiErrorWarningLine } from "react-icons/ri";
+import { AiOutlineCloudUpload } from "react-icons/ai";
 
 const SignUp = () => {
-  // ------------ //
-  //  INTERFACES  //
-  // ------------ //
+  // Types
   interface FormData {
     name: string;
     email: string;
-    phoneNumber: string;
+    phoneNumber?: string;
+    logo?: string;
     password: string;
     reenterPassword: string;
   }
 
-  // ------- //
-  //  HOOKS  //
-  // ------- //
+  // Hooks
+  const { user, setUser, isLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // ------ //
-  //  REFS  //
-  // ------ //
+  // Refs
   const formRef = useRef<HTMLFormElement>(null);
 
-  // -------- //
-  //  STATES  //
-  // -------- //
+  // States
+  const [isUser, setIsUser] = useState(true);
+
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     phoneNumber: "",
+    logo: "",
     password: "",
     reenterPassword: "",
   });
@@ -54,15 +58,29 @@ const SignUp = () => {
   const [isName, setIsName] = useState(true);
   const [isEmail, setIsEmail] = useState(true);
   const [isPhoneNumber, setIsPhoneNumber] = useState(true);
+  const [isLogo, setIsLogo] = useState<boolean | null>(null);
+  const [logoError, setLogoError] = useState("Please provide a logo.");
   const [isPassword, setIsPassword] = useState(true);
   const [isReenterPassword, setIsReenterPassword] = useState(true);
 
   const [existingEmail, setExistingEmail] = useState(false);
   const [existingPhoneNumber, setExistingPhoneNumber] = useState(false);
 
-  // ---------- //
-  //  Handlers  //
-  // ---------- //
+  // Effects
+  useEffect(() => {
+    // If the user is already logged in, redirect them to the home page
+    if (user && !isLoading && typeof window !== "undefined" && (window.location.pathname === "/signup?type=user" || window.location.pathname === "/signup?type=brand")) {
+      router.push("/");
+    }
+  }, [user, isLoading, router]);
+
+  useEffect(() => {
+    if (searchParams.get("type") === "brand") {
+      setIsUser(false);
+    }
+  }, [searchParams]);
+
+  // Functions
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
@@ -95,15 +113,17 @@ const SignUp = () => {
     if (!formRef.current) return;
     setIsFormTriggered(true);
 
-    console.log("Form Data:", formData);
-
     // Check if all the fields are present
-    if (!formData.name || !formData.email || !formData.phoneNumber || !formData.password || !formData.reenterPassword) {
+    if (!formData.name || !formData.email || !formData.password || !formData.reenterPassword || (!isUser && !formData.logo) || (isUser && !formData.phoneNumber)) {
       if (!formData.name) setIsName(false);
       else if (!formData.email) setIsEmail(false);
       else if (!formData.phoneNumber) setIsPhoneNumber(false);
       else if (!formData.password) setIsPassword(false);
       else if (!formData.reenterPassword) setIsReenterPassword(false);
+      else if (!formData.logo) {
+        setIsLogo(false);
+        setLogoError("Please provide a logo.");
+      }
 
       return;
     }
@@ -118,41 +138,103 @@ const SignUp = () => {
 
     // Now, hit a backend request to sign up the user
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/users/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_HOST}/api/users/auth/signup`, formData);
+      setUser(response.data.user);
 
-      console.log(response);
-
-      if (!response.ok) {
-        const errorData = await response.json();
+      router.push("/");
+      toast.success("Account created successfully!");
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        const errorData = error.response.data;
 
         if (errorData?.message === "Existing email.") setExistingEmail(true);
         else if (errorData?.message === "Existing phone number.") setExistingPhoneNumber(true);
-
-        // toast.error(errorData?.message || "Something went wrong. Please try again.");
-        return;
+      } else {
+        console.error("Form Submission Error:", error instanceof Error ? error.message : error);
+        toast.error("An unknown error occurred. Please try again later.");
       }
-
-      toast.success("Account created successfully!");
-
-      // Redirect the user to the home page now
-      router.push("/");
-    } catch (error: unknown) {
-      console.error("Form Submission Error:", error instanceof Error ? error.message : error);
-      toast.error("An unknown error occurred. Please try again later.");
     }
   };
 
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      // Pass the dropped file to the existing handleLogoInput function
+      const fakeEvent = {
+        target: {
+          files: e.dataTransfer.files,
+        },
+      } as React.ChangeEvent<HTMLInputElement>;
+
+      handleLogoInput(fakeEvent);
+    }
+  };
+
+  const handleLogoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; // Use optional chaining to avoid errors
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.includes("image/webp")) {
+      setLogoError("Please upload a WebP image file.");
+      setIsLogo(false);
+
+      return;
+    }
+
+    // Create a URL for the selected image
+    const imageUrl = URL.createObjectURL(file);
+
+    // Create an image element to check dimensions
+    const img = document.createElement("img");
+
+    img.onload = () => {
+      // Check if dimensions match requirements
+      if (img.width !== 1080 || img.height !== 1080) {
+        setLogoError("Image dimensions must be 1080 x 1080 pixels.");
+        setIsLogo(false);
+
+        URL.revokeObjectURL(imageUrl); // Avoid memory leaks
+        return;
+      }
+
+      // Convert file to Base64
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setFormData((prevState) => ({ ...prevState, logo: base64String }));
+      };
+
+      // Convert file to Base64
+      reader.readAsDataURL(file);
+
+      setIsLogo(true);
+      URL.revokeObjectURL(imageUrl);
+    };
+
+    img.onerror = () => {
+      toast.error("There was an error processing your image.");
+      URL.revokeObjectURL(imageUrl);
+    };
+
+    img.src = imageUrl;
+  };
+
   return (
-    <div className="flex flex-col gap-[2rem] items-center justify-center h-[100vh]">
-      <h1 className="text-4xl font-semibold text-neutral-800 mt-[12rem]">Create an account</h1>
+    <div className="flex flex-col gap-[2rem] items-center justify-start min-h-[100vh]">
+      <h1 className="text-4xl font-semibold text-neutral-800 mt-[8rem]">Create an account</h1>
 
       <Form ref={formRef} action={handleFormSubmit} className="flex flex-col gap-[1rem] w-[25vw] justify-center items-center">
         {/* Name Input */}
-        <input name="name" type="text" className={`rounded-md px-4 py-3 border-[1px] ${isName ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"} focus:outline-none w-full`} placeholder="Full Name" value={formData.name} onChange={handleInputChange} />
+        <input name="name" type="text" className={`rounded-md px-4 py-3 border-[1px] ${isName ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"} focus:outline-none w-full`} placeholder={`${isUser ? "Full " : ""}Name`} value={formData.name} onChange={handleInputChange} />
 
         {!isName && (
           <span className="flex flex-row gap-1 justify-center items-center text-red-500 text-sm font-light">
@@ -172,12 +254,41 @@ const SignUp = () => {
         )}
 
         {/* Phone Number Input */}
-        <input name="phoneNumber" type="text" className={`rounded-md px-4 py-3 border-[1px] ${isPhoneNumber && !existingPhoneNumber ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"} focus:outline-none w-full`} placeholder="Phone Number" value={formData.phoneNumber} onChange={handleInputChange} />
+        {isUser && <input name="phoneNumber" type="text" className={`rounded-md px-4 py-3 border-[1px] ${isPhoneNumber && !existingPhoneNumber ? "border-neutral-300 focus:border-[#10a37f]" : "border-red-500"} focus:outline-none w-full`} placeholder="Phone Number" value={formData.phoneNumber} onChange={handleInputChange} />}
 
-        {(!isPhoneNumber || existingPhoneNumber) && (
+        {/* Logo */}
+        {!isUser && (
+          <>
+            {!isLogo ? (
+              <>
+                <label htmlFor="dropzone-file" onDragOver={handleDragOver} onDrop={handleDrop} className={`relative flex flex-col items-center justify-center w-full h-fit min-h-[15rem] p-[3rem] border-[1px] ${isLogo === null || isLogo ? "border-neutral-300" : "border-red-500"} rounded-md cursor-pointer hover:bg-gray-100 transition duration-300`}>
+                  <div className="flex flex-col items-center justify-center gap-[1rem] cursor-pointer">
+                    <AiOutlineCloudUpload className="text-6xl text-gray-400" />
+
+                    <div className="flex flex-col gap-1 justify-center items-center">
+                      <p className="text-sm text-neutral-500">
+                        <span className="font-semibold">Logo: </span>Click to upload or drag and drop
+                      </p>
+
+                      <p className="text-xs text-gray-500">WebP (1080 x 1080 px)</p>
+                    </div>
+                  </div>
+                </label>
+              </>
+            ) : (
+              <label htmlFor="dropzone-file" onDragOver={handleDragOver} onDrop={handleDrop} onClick={() => document.getElementById("dropzone-file")?.click()} className={`relative flex flex-col items-center justify-center w-full h-fit min-h-[15rem] p-[3rem] border-[1px] border-neutral-300 rounded-md cursor-pointer hover:bg-gray-100 transition duration-300`}>
+                <Image src="/logo.webp" alt="logo-image" priority fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-contain" />
+              </label>
+            )}
+
+            <input id="dropzone-file" type="file" className="hidden" placeholder="Phone Number" onChange={handleLogoInput} />
+          </>
+        )}
+
+        {(!isPhoneNumber || existingPhoneNumber || (isLogo !== null && !isLogo)) && (
           <span className="flex flex-row gap-1 justify-center items-center text-red-500 text-sm font-light">
             <RiErrorWarningLine className="text-lg" />
-            {!isEmail ? "Please provide an phone number." : "This number is already being used."}
+            {!isPhoneNumber ? "Please provide an phone number." : existingPhoneNumber ? "This number is already being used." : logoError}
           </span>
         )}
 

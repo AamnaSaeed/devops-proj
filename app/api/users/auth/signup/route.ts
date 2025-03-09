@@ -10,7 +10,9 @@ import { NextResponse } from "next/server";
 // Dependencies
 import bcrypt from "bcryptjs";
 
-// Interfaces
+// Types
+import { UserType } from "@/types";
+
 interface UserRequest {
   name: string;
   email: string;
@@ -18,20 +20,14 @@ interface UserRequest {
   password: string;
 }
 
-interface UserResponse {
-  name: string;
-  email: string;
-  phoneNumber: string;
-}
-
 interface ErrorResponse {
   message: string;
 }
 
 // @desc    Create new user
-// @route   POST /api/users/signup
+// @route   POST /api/users/auth/signup
 // @access  Public
-export async function POST(request: Request): Promise<NextResponse<{ message: string; user?: UserResponse } | ErrorResponse>> {
+export async function POST(request: Request): Promise<NextResponse<{ message: string; user?: UserType } | ErrorResponse>> {
   try {
     // Step 1: Get the provided user information
     const { name, email, phoneNumber, password } = (await request.json()) as UserRequest;
@@ -63,21 +59,13 @@ export async function POST(request: Request): Promise<NextResponse<{ message: st
       password: hashedPassword,
     });
 
-    // Step 7: Generate JWT token for automatic login after signup
-    // const token = generateToken({
-    //   userId: newUser._id.toString(),
-    //   email: newUser.email,
-    //   name: newUser.name,
-    // });
-
-    // Step 8: Set the authentication cookie
-    // setAuthCookie(token);
-
-    // Step 9: Return the new user
-    const userResponse: UserResponse = {
+    // Step 7: Return the new user
+    const userResponse: UserType = {
+      _id: newUser._id.toString(),
       name: newUser.name,
       email: newUser.email,
       phoneNumber: newUser.phoneNumber,
+      role: newUser.role,
     };
 
     return NextResponse.json({ message: "User created successfully", user: userResponse }, { status: 201 });
