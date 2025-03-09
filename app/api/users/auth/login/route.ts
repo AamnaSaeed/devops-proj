@@ -29,7 +29,7 @@ interface ErrorResponse {
 }
 
 // @desc    Login user
-// @route   POST /api/auth/login
+// @route   POST /api/users/auth/login
 // @access  Public
 export async function POST(request: Request): Promise<NextResponse<{ message: string; user?: UserType } | ErrorResponse>> {
   try {

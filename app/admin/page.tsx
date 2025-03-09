@@ -12,9 +12,7 @@ import { UserType } from "@/types";
 
 // Components
 import WarningPopUp from "../components/WarningPopup";
-
-// Icons
-import { IoTrash } from "react-icons/io5";
+import Table from "../components/Table";
 
 const Page = () => {
   // States
@@ -68,41 +66,9 @@ const Page = () => {
 
   return (
     <>
-      <div className="p-[2rem] flex flex-col gap-[2rem] justify-start items-center min-h-[100vh] w-[100vw] mt-[7rem]">
-        <h1 className="text-4xl text-center">Users</h1>
-
-        {users.length > 0 ? (
-          <div className="overflow-x-auto bg-white w-[80%] rounded-lg shadow-md">
-            <table className="min-w-full table-auto">
-              <thead className="bg-gray-200">
-                <tr>
-                  <th className="py-2 px-4 border-b text-center text-gray-700 font-semibold">Name</th>
-                  <th className="py-2 px-4 border-b text-center text-gray-700 font-semibold">Email</th>
-                  <th className="py-2 px-4 border-b text-center text-gray-700 font-semibold">Phone Number</th>
-                  <th className="py-2 px-4 border-b text-center text-gray-700 font-semibold">Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user._id} className="hover:bg-gray-100 transition duration-300">
-                    <td className="py-3 px-4 border-b text-center">{user.name}</td>
-                    <td className="py-3 px-4 border-b text-center">{user.email}</td>
-                    <td className="py-3 px-4 border-b text-center">{user.phoneNumber}</td>
-
-                    <td className="py-3 px-4 border-b text-center">
-                      <button onClick={() => handleDeleteClick(user._id)} className="text-red-600 hover:text-red-700 text-xl transition duration-300">
-                        <IoTrash />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="text-center text-gray-500">No users found</p>
-        )}
+      <div className="p-[2rem] flex flex-col gap-[5rem] justify-start items-center min-h-[100vh] w-[100vw] mt-[7rem]">
+        <Table handleDeleteClick={handleDeleteClick} items={users} type="Users" columns={["Name", "Email", "Phone Number", "Actions"]} />
+        <Table handleDeleteClick={handleDeleteClick} items={users} type="Brands" columns={["Logo", "Name", "Verified", "# of cars", "Actions"]} />
       </div>
 
       {showPopUp && <WarningPopUp handleYesOrNo={handleYesOrNo} setShowPopUp={setShowPopUp} description="This action cannot be reversed. Are you sure that you want to continue?" redIcon={true} />}

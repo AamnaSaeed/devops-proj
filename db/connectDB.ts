@@ -3,7 +3,7 @@ import mongoose, { ConnectOptions } from "mongoose";
 const connectDB = async (): Promise<void> => {
   try {
     const conn = await mongoose.connect(
-      process.env.MONGO_URI as string,
+      process.env.MONGODB_URI as string,
       {
         // Optional: You can add other connection options here, if necessary
       } as ConnectOptions

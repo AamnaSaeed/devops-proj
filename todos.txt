@@ -1,6 +1,3 @@
-JWT Token
-Cookies
-Middleware
 Recaptcha
 Email Verification
 Password Reset
@@ -10,3 +7,7 @@ Remember me
 Validating all information's structure in the backend (e.g email, phone number, etc)
 Cloudflare for rate limiting/attempt lockout on passwords (express-rate-limit)
 CSRF
+Companies
+New & used Cars
+TOS
+Cloud for images

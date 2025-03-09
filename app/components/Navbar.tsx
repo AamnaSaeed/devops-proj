@@ -26,7 +26,7 @@ const NavBar = () => {
   // Functions
   const handleLogout = async () => {
     try {
-      const res = await axios.post("/api/auth/logout");
+      const res = await axios.post("/api/users/auth/logout");
 
       // Success
       if (res.status === 200) {

@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await fetch("/api/auth/me");
+        const response = await fetch("/api/users/auth/me");
 
         // No token
         if (response.status === 401) {

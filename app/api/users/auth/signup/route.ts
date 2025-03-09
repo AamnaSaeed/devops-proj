@@ -25,7 +25,7 @@ interface ErrorResponse {
 }
 
 // @desc    Create new user
-// @route   POST /api/auth/signup
+// @route   POST /api/users/auth/signup
 // @access  Public
 export async function POST(request: Request): Promise<NextResponse<{ message: string; user?: UserType } | ErrorResponse>> {
   try {

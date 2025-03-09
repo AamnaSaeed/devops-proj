@@ -1,7 +1,7 @@
 "use client";
 
 // React
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 // Next JS
 import Form from "next/form";
@@ -26,7 +26,7 @@ const Login = () => {
 
   // Hooks
   const router = useRouter();
-  const { setUser } = useAuth();
+  const { user, setUser, isLoading } = useAuth();
 
   // Refs
   const formRef = useRef<HTMLFormElement>(null);
@@ -43,6 +43,14 @@ const Login = () => {
 
   const [existingEmail, setExistingEmail] = useState(false);
   const [incorrectPassword, setIncorrectPassword] = useState(false);
+
+  // Effects
+  useEffect(() => {
+    // If the user is already logged in, redirect them to the home page
+    if (user && !isLoading && typeof window !== "undefined" && window.location.pathname === "/login") {
+      router.push("/");
+    }
+  }, [user, isLoading, router]);
 
   // Functions
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,7 +84,7 @@ const Login = () => {
 
     // Now, hit a backend request to login the user
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/auth/login`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/users/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -141,7 +149,7 @@ const Login = () => {
 
         <span className="flex flex-row gap-[0.5rem] -mt-[1rem] text-sm font-light">
           Don&#39;t have an account?
-          <Link href="/signup" className="text-[#10a37f] cursor-pointer">
+          <Link href="/signup?type=user" className="text-[#10a37f] cursor-pointer">
             Sign Up
           </Link>
         </span>
