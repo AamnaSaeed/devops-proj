@@ -35,9 +35,7 @@ const NavBar = () => {
       }
 
       // Error
-      else {
-        console.error("Error logging out:", res.data.error);
-      }
+      else console.error("Error logging out:", res.data.error);
     } catch (error) {
       console.error("Error logging out:", error);
     }

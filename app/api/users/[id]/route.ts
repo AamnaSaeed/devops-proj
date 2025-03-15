@@ -5,47 +5,34 @@ import connectDB from "@/db/connectDB";
 import User from "@/models/User";
 
 // Next Js
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-// @desc    Get all users
-// @route   GET /api/users
+// @desc    Delete user
+// @route   GET /api/users/:id
 // @access  Private
-export async function DELETE(req: Request, { params }: { params: { id: string } }): Promise<NextResponse> {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }): Promise<NextResponse> {
   try {
-    // Step 1: Get the user email from request headers
+    // Step 1: Check if the user themselves is making the request
     const userEmail = req.headers.get("x-user-email");
+    if (!userEmail) return NextResponse.json({ message: "User not found or unauthorized." }, { status: 401 });
 
-    if (!userEmail) {
-      return NextResponse.json({ message: "User not found or unauthorized." }, { status: 401 });
-    }
-
-    // Step 2: Get the user making the request
-    const user = await User.findOne({ email: userEmail });
-
-    if (!user) {
-      return NextResponse.json({ message: "User not found or unauthorized." }, { status: 401 });
-    }
-
-    // Step 3: Connect to the database
+    // Step 2: Connect to the database
     await connectDB();
 
-    // Step 4: Get the user to be deleted
+    // Step 3: Get the user to be deleted
     const userId = params.id;
     const userToDelete = await User.findById(userId);
+    if (!userToDelete) return NextResponse.json({ message: "User not found." }, { status: 404 });
 
-    if (!userToDelete) {
-      return NextResponse.json({ message: "User not found." }, { status: 404 });
-    }
-
-    // Step 5: Check if the user is authorized to perform this action
-    if (userToDelete.email !== userEmail && user.role !== "admin") {
+    // Step 4: Check if the user is authorized to perform this action
+    if (userToDelete.email !== userEmail || userToDelete.role !== "admin") {
       return NextResponse.json({ message: "Not authorized." }, { status: 401 });
     }
 
-    // Step 6: Delete the user
+    // Step 5: Delete the user
     await User.findByIdAndDelete(userId);
 
-    // Step 7: Return an appropriate response
+    // Step 6: Return an appropriate response
     return NextResponse.json({ message: "User deleted.", user: userToDelete }, { status: 200 });
   } catch (error: unknown) {
     if (error instanceof Error) console.error(error.message);

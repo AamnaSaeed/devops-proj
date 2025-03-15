@@ -23,19 +23,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const response = await fetch("/api/users/auth/me");
 
-        // No token
-        if (response.status === 401) {
+        // No token or error
+        if (response.status === 401 || !response.ok) {
           setIsLoading(false);
           setUser(null);
-
-          return;
-        }
-
-        // Error
-        if (!response.ok) {
-          setIsLoading(false);
-          setUser(null);
-
           return;
         }
 
@@ -51,7 +42,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Check if user is already logged in (using JWT cookie)
     checkAuthStatus();
-    console.log("Auth status checked");
   }, []);
 
   return <AuthContext.Provider value={{ user, setUser, isLoading }}>{children}</AuthContext.Provider>;

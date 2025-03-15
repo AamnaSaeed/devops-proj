@@ -1,15 +1,18 @@
+// React
 import React from "react";
+
+// Next Js
+import Image from "next/image";
 
 // Icons
 import { IoTrash } from "react-icons/io5";
 
 // Types
-
-import { UserType } from "@/types";
+import { BrandType, UserType, targetItemType } from "@/types";
 
 interface Props {
-  handleDeleteClick: (item: string | object) => void;
-  items: Array<UserType>;
+  handleDeleteClick: (item: targetItemType) => void;
+  items: Array<UserType | BrandType>;
   type: string;
   columns: Array<string>;
 }
@@ -37,10 +40,21 @@ const Table = ({ handleDeleteClick, items, type, columns }: Props) => {
                 <tr key={item._id} className="hover:bg-gray-100 transition duration-300">
                   <td className="py-3 px-4 border-b text-center">{item.name}</td>
                   <td className="py-3 px-4 border-b text-center">{item.email}</td>
-                  <td className="py-3 px-4 border-b text-center">{item.phoneNumber}</td>
+
+                  <td className="py-3 px-4 border-b flex flex-row justify-center">
+                    {type === "Users" ? (
+                      (item as UserType).phoneNumber
+                    ) : (
+                      <div className="relative w-10 h-10">
+                        <Image src={(item as BrandType).logo} alt="brand-logo" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-contain" />
+                      </div>
+                    )}
+                  </td>
+
+                  {type === "Brands" && <td className="py-3 px-4 border-b text-center">{(item as BrandType).isVerified ? "True" : "False"}</td>}
 
                   <td className="py-3 px-4 border-b text-center">
-                    <button onClick={() => handleDeleteClick(item._id)} className="text-red-600 hover:text-red-700 text-xl transition duration-300">
+                    <button onClick={() => handleDeleteClick({ id: item._id, type })} className="text-red-600 hover:text-red-700 text-xl transition duration-300">
                       <IoTrash />
                     </button>
                   </td>

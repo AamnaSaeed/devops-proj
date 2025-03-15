@@ -6,6 +6,15 @@ export interface UserType {
   role: string;
 }
 
+export interface BrandType {
+  _id: string;
+  name: string;
+  email: string;
+  logo: string;
+  isVerified: string;
+  cars: string;
+}
+
 export interface AuthContextType {
   user: UserType | null;
   setUser: (user: UserType | null) => void;
@@ -21,10 +30,9 @@ export interface NewCarVariantType {
   price: number;
   image: string;
   reviews: Array<{ rating: number; comment: string }>;
-  transmission: string;
+  transmission: "automatic" | "manual";
   engine: string;
   mileage: number;
-  fuelType: string;
   colors: Array<{ name: string; hex: string }>;
   deliveryTime: number; // In days
 }
@@ -32,4 +40,9 @@ export interface NewCarVariantType {
 export interface NewCarType {
   name: string;
   variants: Array<NewCarVariantType>;
+}
+
+export interface targetItemType {
+  id: string;
+  type: string;
 }

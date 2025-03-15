@@ -11,3 +11,4 @@ Companies
 New & used Cars
 TOS
 Cloud for images
+Dark & light mode
