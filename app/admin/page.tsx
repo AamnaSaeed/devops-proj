@@ -1,33 +1,26 @@
+// Admin Dashboard Page (Styled like Pak Wheels Landing Page)
 "use client";
 
-// React
 import React, { useState, useEffect } from "react";
-
-// Dependancies
 import axios from "axios";
 import { toast } from "react-toastify";
 
-// Components
 import WarningPopUp from "../components/WarningPopup";
 import Table from "../components/Table";
 
-// Types
 import { UserType, BrandType, targetItemType } from "@/types";
 
 const Page = () => {
-  // States
   const [users, setUsers] = useState<Array<UserType>>([]);
   const [brands, setBrands] = useState<Array<BrandType>>([]);
   const [showPopUp, setShowPopUp] = useState(false);
   const [targetItem, setTargetItem] = useState<null | targetItemType>(null);
 
-  // Effects
   useEffect(() => {
     fetchUsers();
     fetchBrands();
   }, []);
 
-  // Functions
   const fetchUsers = async () => {
     try {
       const data = await axios.get("/api/users");
@@ -61,13 +54,10 @@ const Page = () => {
   };
 
   const handleYesOrNo = (yes: boolean) => {
-    // Delete the item
     if (yes) {
       if ((targetItem as targetItemType).type === "Users") deleteItem(targetItem as targetItemType);
       if ((targetItem as targetItemType).type === "Brands") deleteItem(targetItem as targetItemType);
     }
-
-    // Close the pop up now, regardless of the choice
     setShowPopUp(false);
   };
 
@@ -77,14 +67,24 @@ const Page = () => {
   };
 
   return (
-    <>
-      <div className="p-[2rem] flex flex-col gap-[5rem] justify-start items-center min-h-[100vh] w-[100vw] mt-[7rem]">
-        <Table handleDeleteClick={handleDeleteClick} items={users} type="Users" columns={["Name", "Email", "Phone Number", "Actions"]} />
-        <Table handleDeleteClick={handleDeleteClick} items={brands} type="Brands" columns={["Name", "Email", "Logo", "Verify", "Actions"]} />
+    <main className="min-h-screen w-full bg-gradient-to-br from-teal-50 to-gray-100 px-6 py-10">
+      <div className="mt-[7rem] max-w-7xl mx-auto text-center">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 bg-clip-text text-transparent bg-gradient-to-r from-teal-900 to-cyan-800">Dashboard</h1>
+        <p className="text-lg text-gray-700 mb-16">Manage your users and brands in one clean, professional space.</p>
+      </div>
+
+      <div className="flex flex-col gap-16 items-center max-w-6xl mx-auto">
+        <div className="w-full bg-white rounded-2xl shadow-lg p-6">
+          <Table handleDeleteClick={handleDeleteClick} items={users} type="Users" columns={["Name", "Email", "Phone Number", "Actions"]} />
+        </div>
+
+        <div className="w-full bg-white rounded-2xl shadow-lg p-6">
+          <Table handleDeleteClick={handleDeleteClick} items={brands} type="Brands" columns={["Name", "Email", "Logo", "Verify", "Actions"]} />
+        </div>
       </div>
 
       {showPopUp && <WarningPopUp handleYesOrNo={handleYesOrNo} setShowPopUp={setShowPopUp} description="This action cannot be reversed. Are you sure that you want to continue?" redIcon={true} />}
-    </>
+    </main>
   );
 };
 

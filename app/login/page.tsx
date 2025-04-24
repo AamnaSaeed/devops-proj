@@ -149,7 +149,7 @@ const Login = () => {
 
         <span className="flex flex-row gap-[0.5rem] -mt-[1rem] text-sm font-light">
           Don&#39;t have an account?
-          <Link href="/signup?type=user" className="text-[#10a37f] cursor-pointer">
+          <Link href="/signup" className="text-[#10a37f] cursor-pointer">
             Sign Up
           </Link>
         </span>

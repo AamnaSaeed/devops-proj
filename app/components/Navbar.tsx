@@ -49,9 +49,17 @@ const NavBar = () => {
       </Link>
 
       <div className="flex flex-col p-4 md:p-0 mt-4 font-medium rounded-lg md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0">
-        <span className="block py-2 px-3 rounded hover:text-[#2acea5] md:p-0 text-white bg-transparent cursor-pointer transition duration-200">New</span>
-        <span className="block py-2 px-3 rounded hover:text-[#2acea5] md:p-0 text-white bg-transparent cursor-pointer transition duration-200">Used</span>
-        <span className="block py-2 px-3 bg-transparent rounded text-white hover:text-[#2acea5] md:p-0 cursor-pointer transition duration-200">Rent</span>
+        <Link href="new-cars" className="block py-2 px-3 rounded hover:text-[#2acea5] md:p-0 text-white bg-transparent cursor-pointer transition duration-200">
+          New
+        </Link>
+
+        <Link href="used-cars" className="block py-2 px-3 rounded hover:text-[#2acea5] md:p-0 text-white bg-transparent cursor-pointer transition duration-200">
+          Used
+        </Link>
+
+        <Link href="new-cars" className="block py-2 px-3 bg-transparent rounded text-white hover:text-[#2acea5] md:p-0 cursor-pointer transition duration-200">
+          Rent
+        </Link>
       </div>
 
       <div className="flex flex-row gap-4">

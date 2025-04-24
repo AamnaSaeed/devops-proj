@@ -12,3 +12,4 @@ New & used Cars
 TOS
 Cloud for images
 Dark & light mode
+Allow access to the brands only once they are verified

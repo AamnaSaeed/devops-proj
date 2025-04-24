@@ -7,7 +7,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Form from "next/form";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 // Dependencies
 import { toast } from "react-toastify";
@@ -34,7 +34,6 @@ const SignUp = () => {
   // Hooks
   const { user, setUser, isLoading } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   // Refs
   const formRef = useRef<HTMLFormElement>(null);
@@ -69,16 +68,10 @@ const SignUp = () => {
   // Effects
   useEffect(() => {
     // If the user is already logged in, redirect them to the home page
-    if (user && !isLoading && typeof window !== "undefined" && (window.location.pathname === "/signup?type=user" || window.location.pathname === "/signup?type=brand")) {
+    if (user && !isLoading && typeof window !== "undefined" && window.location.pathname === "/signup") {
       router.push("/");
     }
   }, [user, isLoading, router]);
-
-  useEffect(() => {
-    if (searchParams.get("type") === "brand") {
-      setIsUser(false);
-    }
-  }, [searchParams]);
 
   // Functions
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,12 +129,24 @@ const SignUp = () => {
 
     formRef.current.reset();
 
+    // Clean up the form data
+    if (isUser) delete formData.logo;
+    else delete formData.phoneNumber;
+
+    // Convert the logo to a base64 string (if required)
+    // if (!isUser) {
+    //   const logoFile = formData.logo;
+    //   const reader = new FileReader();
+    // }
+
     // Now, hit a backend request to sign up the user
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_HOST}/api/users/auth/signup`, formData);
-      setUser(response.data.user);
+      const endpoint = `/api/${isUser ? "users" : "brands"}/auth/signup`;
+      const response = await axios.post(`/api/${endpoint}/auth/signup`, formData);
 
-      router.push("/");
+      if (isUser) setUser(response.data.user);
+
+      router.push(isUser ? "/" : "/not-verified");
       toast.success("Account created successfully!");
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
@@ -177,15 +182,14 @@ const SignUp = () => {
     }
   };
 
-  const handleLogoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]; // Use optional chaining to avoid errors
+  const handleLogoInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     // Validate file type
     if (!file.type.includes("image/webp")) {
       setLogoError("Please upload a WebP image file.");
       setIsLogo(false);
-
       return;
     }
 
@@ -195,29 +199,45 @@ const SignUp = () => {
     // Create an image element to check dimensions
     const img = document.createElement("img");
 
-    img.onload = () => {
+    img.onload = async () => {
       // Check if dimensions match requirements
       if (img.width !== 1080 || img.height !== 1080) {
         setLogoError("Image dimensions must be 1080 x 1080 pixels.");
         setIsLogo(false);
-
         URL.revokeObjectURL(imageUrl); // Avoid memory leaks
         return;
       }
 
-      // Convert file to Base64
-      const reader = new FileReader();
+      // Create FormData object
+      const formData = new FormData();
 
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setFormData((prevState) => ({ ...prevState, logo: base64String }));
-      };
+      // Append the file to FormData
+      formData.append("logo", file);
 
-      // Convert file to Base64
-      reader.readAsDataURL(file);
+      try {
+        // Send the file to the server using Axios
+        const response = await axios.post("/api/brands/upload-logo", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
 
-      setIsLogo(true);
-      URL.revokeObjectURL(imageUrl);
+        // Handle the server response
+        if (response.data.success) {
+          setFormData((prevState) => ({
+            ...prevState,
+            logo: response.data.fileUrl, // Store the file URL returned by the server
+          }));
+          setIsLogo(true);
+        } else {
+          setLogoError("Failed to upload the logo.");
+          setIsLogo(false);
+        }
+      } catch (error) {
+        console.error("Error uploading logo:", error);
+        setLogoError("There was an error uploading your logo.");
+        setIsLogo(false);
+      }
+
+      URL.revokeObjectURL(imageUrl); // Avoid memory leaks
     };
 
     img.onerror = () => {
@@ -230,7 +250,14 @@ const SignUp = () => {
 
   return (
     <div className="flex flex-col gap-[2rem] items-center justify-start min-h-[100vh]">
-      <h1 className="text-4xl font-semibold text-neutral-800 mt-[8rem]">Create an account</h1>
+      <h1 className="text-4xl font-semibold text-neutral-800 mt-[8rem]">{isUser ? "User" : "Brand"} account</h1>
+
+      <span className="flex flex-row gap-[0.5rem] -mt-[1.25rem] text-sm font-light">
+        Not a {isUser ? "user" : "brand"}?
+        <button onClick={() => setIsUser(!isUser)} className="text-[#10a37f] cursor-pointer">
+          Switch to a {isUser ? "brand" : "user"} account
+        </button>
+      </span>
 
       <Form ref={formRef} action={handleFormSubmit} className="flex flex-col gap-[1rem] w-[25vw] justify-center items-center">
         {/* Name Input */}
