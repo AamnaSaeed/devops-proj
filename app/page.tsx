@@ -68,8 +68,8 @@ export default function Home() {
       <section className="mt-24 text-center max-w-3xl mx-auto">
         <h2 className="text-4xl font-bold text-gray-900 mb-6">Ready to Make Your Move?</h2>
         <p className="text-lg text-gray-700 mb-8">Whether you&#39;re buying or selling, Pak Wheels has your back. Join the community today.</p>
-        <Link href="/used-cars" className="px-8 py-4 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-full text-xl hover:opacity-90 transition">
-          Explore used cars
+        <Link href="/post-ad" className="px-8 py-4 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-full text-xl hover:opacity-90 transition">
+          Start Selling
         </Link>
       </section>
     </main>
