@@ -8,21 +8,74 @@ const StartSellingPage = () => {
     mileage: "",
     modelYear: "",
     city: "",
-    image: null as File | null,
+    sellerName: "",
+    sellerPhone: "",
+    sellerComments: "",
+    images: [] as File[],
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, files } = e.target;
-    if (name === "image" && files) {
-      setFormData({ ...formData, image: files[0] });
+  const [loading, setLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, files } = e.target as HTMLInputElement;
+    if (name === "images" && files) {
+      setFormData({ ...formData, images: Array.from(files) });
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData);
+    setLoading(true);
+    setSuccessMsg("");
+
+    try {
+      // For now, we'll just simulate image URLs (you can later integrate real image uploads like Cloudinary)
+      const fakeImageUrls = formData.images.map((file) => `/uploads/${file.name}`);
+
+      const res = await fetch("/api/ads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          price: formData.price,
+          mileage: formData.mileage,
+          modelYear: parseInt(formData.modelYear),
+          city: formData.city,
+          sellerName: formData.sellerName,
+          sellerPhone: formData.sellerPhone,
+          sellerComments: formData.sellerComments,
+          images: fakeImageUrls,
+        }),
+      });
+
+      if (res.ok) {
+        setSuccessMsg("Car ad created successfully!");
+        setFormData({
+          name: "",
+          price: "",
+          mileage: "",
+          modelYear: "",
+          city: "",
+          sellerName: "",
+          sellerPhone: "",
+          sellerComments: "",
+          images: [],
+        });
+      } else {
+        const errorData = await res.json();
+        alert(errorData.message || "Failed to post car ad.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred while posting the car ad.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,11 +88,18 @@ const StartSellingPage = () => {
         <input type="text" name="mileage" placeholder="Mileage" value={formData.mileage} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg" required />
         <input type="number" name="modelYear" placeholder="Model Year" value={formData.modelYear} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg" required />
         <input type="text" name="city" placeholder="City" value={formData.city} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg" required />
-        <input type="file" name="image" accept="image/*" onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg" required />
 
-        <button type="submit" className="w-full p-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition">
-          Submit
+        <input type="text" name="sellerName" placeholder="Your Name" value={formData.sellerName} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg" required />
+        <input type="text" name="sellerPhone" placeholder="Phone Number" value={formData.sellerPhone} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg" required />
+        <textarea name="sellerComments" placeholder="Additional Comments" value={formData.sellerComments} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg" rows={3}></textarea>
+
+        <input type="file" name="images" accept="image/*" multiple onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg" required />
+
+        <button type="submit" disabled={loading} className="w-full p-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition">
+          {loading ? "Submitting..." : "Submit"}
         </button>
+
+        {successMsg && <p className="text-green-600 text-center mt-4">{successMsg}</p>}
       </form>
     </div>
   );

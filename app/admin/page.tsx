@@ -10,10 +10,13 @@ import Table from "../components/Table";
 
 import { UserType, BrandType, targetItemType } from "@/types";
 
+import BrandForm from "../components/BrandForm"; // Import this
+
 const Page = () => {
   const [users, setUsers] = useState<Array<UserType>>([]);
   const [brands, setBrands] = useState<Array<BrandType>>([]);
   const [showPopUp, setShowPopUp] = useState(false);
+  const [showBrandForm, setShowBrandForm] = useState(false); // <-- new state
   const [targetItem, setTargetItem] = useState<null | targetItemType>(null);
 
   useEffect(() => {
@@ -45,8 +48,10 @@ const Page = () => {
     try {
       const endpoint = `/api/${item.type.toLowerCase()}/${item.id}`;
       const res = await axios.delete(endpoint);
+
       toast.warning(res.data.message);
       fetchUsers();
+      fetchBrands(); // <- important
     } catch (error) {
       console.error(error);
       toast.error("An error occurred.");
@@ -79,11 +84,20 @@ const Page = () => {
         </div>
 
         <div className="w-full bg-white rounded-2xl shadow-lg p-6">
+          {/* Add Brand Button */}
+          <div className="flex justify-end mb-6">
+            <button onClick={() => setShowBrandForm(true)} className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg">
+              Add New Brand
+            </button>
+          </div>
+
           <Table handleDeleteClick={handleDeleteClick} items={brands} type="Brands" columns={["Name", "Email", "Logo", "Verify", "Actions"]} />
         </div>
       </div>
 
       {showPopUp && <WarningPopUp handleYesOrNo={handleYesOrNo} setShowPopUp={setShowPopUp} description="This action cannot be reversed. Are you sure that you want to continue?" redIcon={true} />}
+
+      {showBrandForm && <BrandForm setShowPopup={setShowBrandForm} onBrandAdded={fetchBrands} />}
     </main>
   );
 };
