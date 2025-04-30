@@ -141,7 +141,7 @@ const SignUp = () => {
 
     // Now, hit a backend request to sign up the user
     try {
-      const endpoint = `/api/${isUser ? "users" : "brands"}/auth/signup`;
+      const endpoint = `/${isUser ? "users" : "brands"}`;
       const response = await axios.post(`/api/${endpoint}/auth/signup`, formData);
 
       if (isUser) setUser(response.data.user);
