@@ -111,7 +111,7 @@ const RentalsPage = () => {
             {cars.map((car) => (
               <div key={car._id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
                 <div className="relative h-48">
-                  <Image src={car.images[0] || "/haval.png"} alt={car.title} fill className="object-cover" />
+                  <Image src={/*car.images[0] ||*/"/haval.png"} alt={car.title} fill className="object-cover" />
                 </div>
                 <div className="p-6">
                   <h3 className="text-xl font-semibold text-gray-800 mb-2">{car.title}</h3>
