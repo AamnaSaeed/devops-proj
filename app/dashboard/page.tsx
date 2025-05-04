@@ -50,7 +50,6 @@ interface RentalCar {
   };
 }
 
-
 interface SectionState {
   data: any[];
   loading: boolean;
@@ -119,19 +118,15 @@ const Dashboard = () => {
       updateSection(section, { loading: true, error: null });
       const response = await apiCall();
 
-      if (section === 'myRentalCars') {
-        console.log("Fetched rental cars:", response.data);
-      }
-      
-      updateSection(section, { 
+      updateSection(section, {
         data: dataExtractor(response.data) || [],
-        loading: false 
+        loading: false
       });
     } catch (error) {
       console.error(`Error fetching ${section}:`, error);
-      updateSection(section, { 
+      updateSection(section, {
         error: `Failed to fetch ${section}. Please try again.`,
-        loading: false 
+        loading: false
       });
     }
   };
@@ -146,6 +141,29 @@ const Dashboard = () => {
       toast.error("Failed to update rental status");
     }
   };
+
+  const handleToggleAvailability = async (carId: string, currentAvailability: boolean) => {
+    try {
+      const newAvailability = !currentAvailability;
+
+      // Send the update request to the backend
+      const response = await axios.put(`/api/cars/update-availability/${carId}`, {
+        availability: newAvailability
+      });
+
+      if (response.status === 200) {
+        // Update the UI by fetching the updated data
+        toast.success(`Car marked as ${newAvailability ? 'Available' : 'Unavailable'}`);
+        fetchAllData(); // Re-fetch the data to show the updated availability
+      } else {
+        toast.error('Failed to update car availability');
+      }
+    } catch (error) {
+      console.error("Error toggling availability", error);
+      toast.error("Failed to toggle availability");
+    }
+  };
+
 
   const renderSection = (
     title: string,
@@ -165,7 +183,7 @@ const Dashboard = () => {
       return (
         <div className="bg-white rounded-xl p-6 shadow-md text-center">
           <p className="text-red-600 mb-4">{section.error}</p>
-          <button 
+          <button
             onClick={fetchAllData}
             className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
           >
@@ -229,6 +247,14 @@ const Dashboard = () => {
                         <p className={`mt-2 ${car.availability ? 'text-green-600' : 'text-red-600'}`}>
                           {car.availability ? 'Available' : 'Not Available'}
                         </p>
+
+                        {/* Button to toggle availability */}
+                        <button
+                          onClick={() => handleToggleAvailability(car._id, car.availability)}
+                          className={`mt-4 px-4 py-2 text-white rounded-lg ${car.availability ? 'bg-red-600' : 'bg-green-600'} hover:${car.availability ? 'bg-red-700' : 'bg-green-700'} transition-colors`}
+                        >
+                          {car.availability ? 'Mark as Unavailable' : 'Mark as Available'}
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -264,13 +290,12 @@ const Dashboard = () => {
                             </p>
                           </div>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          request.status === "approved" ? "bg-green-100 text-green-800" :
-                          request.status === "pending" ? "bg-yellow-100 text-yellow-800" :
-                          request.status === "rejected" ? "bg-red-100 text-red-800" :
-                          request.status === "cancelled" ? "bg-gray-100 text-gray-800" :
-                          "bg-blue-100 text-blue-800"
-                        }`}>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${request.status === "approved" ? "bg-green-100 text-green-800" :
+                            request.status === "pending" ? "bg-yellow-100 text-yellow-800" :
+                              request.status === "rejected" ? "bg-red-100 text-red-800" :
+                                request.status === "cancelled" ? "bg-gray-100 text-gray-800" :
+                                  "bg-blue-100 text-blue-800"
+                          }`}>
                           {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                         </span>
                       </div>
@@ -336,13 +361,12 @@ const Dashboard = () => {
                             </p>
                           </div>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          request.status === "approved" ? "bg-green-100 text-green-800" :
-                          request.status === "pending" ? "bg-yellow-100 text-yellow-800" :
-                          request.status === "rejected" ? "bg-red-100 text-red-800" :
-                          request.status === "cancelled" ? "bg-gray-100 text-gray-800" :
-                          "bg-blue-100 text-blue-800"
-                        }`}>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${request.status === "approved" ? "bg-green-100 text-green-800" :
+                            request.status === "pending" ? "bg-yellow-100 text-yellow-800" :
+                              request.status === "rejected" ? "bg-red-100 text-red-800" :
+                                request.status === "cancelled" ? "bg-gray-100 text-gray-800" :
+                                  "bg-blue-100 text-blue-800"
+                          }`}>
                           {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                         </span>
                       </div>
