@@ -42,7 +42,14 @@ interface RentalCar {
   pricePerDay: number;
   images: string[];
   availability: boolean;
+  ownerId: {
+    _id: string;
+    name: string;
+    email: string;
+    phoneNumber: string;
+  };
 }
+
 
 interface SectionState {
   data: any[];
@@ -98,7 +105,7 @@ const Dashboard = () => {
     // Fetch my rental cars
     fetchData(
       'myRentalCars',
-      () => axios.get(`/api/cars/my-cars/${user?._id}`),
+      () => axios.get(`/api/cars/rental-by-owner/${user?._id}`),
       data => data.cars
     );
   };
@@ -111,6 +118,11 @@ const Dashboard = () => {
     try {
       updateSection(section, { loading: true, error: null });
       const response = await apiCall();
+
+      if (section === 'myRentalCars') {
+        console.log("Fetched rental cars:", response.data);
+      }
+      
       updateSection(section, { 
         data: dataExtractor(response.data) || [],
         loading: false 
@@ -204,7 +216,7 @@ const Dashboard = () => {
                     <div key={car._id} className="bg-white rounded-xl shadow-md overflow-hidden">
                       <div className="relative h-48">
                         <Image
-                          src={car.images[0] || "/haval.png"}
+                          src={/*car.images[0] ||*/ "/haval.png"}
                           alt={car.title}
                           fill
                           className="object-cover"
