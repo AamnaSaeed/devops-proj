@@ -68,4 +68,3 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         return NextResponse.json({ message: "Error deleting rental request" }, { status: 500 });
     }
 };
-

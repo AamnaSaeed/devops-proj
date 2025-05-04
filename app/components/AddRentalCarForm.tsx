@@ -32,10 +32,11 @@ const AddRentalCarForm = ({ setShowPopup, onCarAdded }: Props) => {
         title: formData.title,
         description: formData.description,
         location: formData.location,
+        price: 0,
         pricePerDay: parseFloat(formData.pricePerDay),
-        images: ["/haval.png"], // Placeholder image
+        images: ["/haval.png"],
+        isForSale: false,
         isForRent: true,
-        availability: true,
       };
 
       await axios.post("/api/cars", newCar);
