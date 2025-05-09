@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-app
+  labels:
+    app: devops-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: devops-app
+  template:
+    metadata:
+      labels:
+        app: devops-app
+    spec:
+      containers:
+      - name: devops-app
+        image: devops-app:latest
+        imagePullPolicy: Never # For local development
+        ports:
+        - containerPort: 3000 # Next.js default port
+        envFrom:
+        - configMapRef:
+            name: devops-app-config
+        - secretRef:
+            name: devops-app-secrets
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "512Mi"
+          requests:
+            cpu: "0.2"
+            memory: "256Mi"
