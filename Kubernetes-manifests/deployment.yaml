@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: devops-app
-        image: devops-app:latest
-        imagePullPolicy: Never # For local development
+        image: aamnasaeed/devops-app:latest
+        imagePullPolicy: Always # For local development
         ports:
         - containerPort: 3000 # Next.js default port
         envFrom:

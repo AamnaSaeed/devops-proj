@@ -1,4 +1,4 @@
-FROM node:23-alpine
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
@@ -10,11 +10,12 @@ RUN npm install
 # Copy rest of the code
 COPY . .
 
-# Expose the dev port
+# Environment variables for development
+ENV CHOKIDAR_USEPOLLING=true
+ENV WATCHPACK_POLLING=true
+
+# Expose the port
 EXPOSE 3000
 
-# Enable file system watching in Docker
-ENV CHOKIDAR_USEPOLLING=true
-
 # Start the dev server
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "start"]
